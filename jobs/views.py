@@ -46,3 +46,12 @@ class LogoutView(APIView):
             return Response({"message": "Successfully logged out"}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
+
+from django.db.models import Count
+from rest_framework.decorators import api_view
+def job_status_analytics(request):
+    user=request.user
+    if not user.is_authenticated:
+        return Response({"error": "User not authenticated"}, status=status.HTTP_400_BAD_REQUEST)
+    analytics = JobApplication.objects.filter(user=user).values('status').annotate(total=Count('status')).order_by('status')
+    return Response(analytics)
